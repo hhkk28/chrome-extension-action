@@ -1,0 +1,18 @@
+{
+    "branches": ["main"],
+    "plugins": [
+        "@semantic-release/commit-analyzer",
+        "@semantic-release/release-notes-generator",
+        [
+            "@semantic-release/github",{
+                "assets": [
+                    {  
+                        "path": "./extension.zip",
+                        "label": "Chrome extension" 
+                    }
+                ]
+              }
+        ]
+    ],
+    "repository": "https://github.com/hhkk28/chrome-extension-action"
+}

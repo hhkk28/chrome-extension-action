@@ -1,0 +1,24 @@
+{
+  "name": "chrome-extension-action",
+  "version": "1.6.1",
+  "description": "",
+  "main": "src/popup.js",
+  "scripts": {
+    "release": "semantic-release --debug",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hhkk28/chrome-extension-action.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/hhkk28/chrome-extension-action/issues"
+  },
+  "homepage": "https://github.com/hhkk28/chrome-extension-action#readme",
+  "devDependencies": {
+    "dot-json": "^1.3.0",
+    "semantic-release": "^23.0.8"
+  }
+}
