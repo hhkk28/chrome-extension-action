@@ -1,6 +1,6 @@
 {
   "name": "chrome-extension-action",
-  "version": "1.6.1",
+  "version": "1.0.0",
   "description": "",
   "main": "src/popup.js",
   "scripts": {
