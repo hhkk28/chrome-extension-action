@@ -40,12 +40,6 @@ jobs:
         run: |
           npx dot-json@1 ./src/manifest.json version "${{ steps.generate_version.outputs.release-version }}"
           npx dot-json@1 package.json version "${{ steps.generate_version.outputs.release-version }}"
-
-      - name: Commit changes
-        run: |
-          git add .
-          git commit -m "chore(release): Bump up to v$(grep version package.json | awk -F \" '{print $4}')[skip ci]"
-          git push origin HEAD
   
   bundle-and-release:
     needs: update-manifest-version
