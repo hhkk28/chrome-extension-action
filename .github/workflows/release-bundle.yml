@@ -1,9 +1,60 @@
-name: Create release
+name: Update manifest version
 on:
-  workflow_dispatch
+  push:
+    branches:
+      - main
 
-jobs:  
+jobs:
+  update-manifest-version:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ secrets.GH_TOKEN }}
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Get version number
+        uses: codfish/semantic-release-action@v3
+        id: generate_version
+        with:
+          dry-run: true
+          plugins: |
+            [
+              '@semantic-release/commit-analyzer',
+             '@semantic-release/release-notes-generator',
+             '@semantic-release/github',
+            ]
+      
+      - name: Configuration GitHub
+        run: |
+          git config --global user.name 'Harish Karthik'
+          git config --global user.email '85559412+hhkk28@users.noreply.github.com'
+          git remote set-url origin https://github-actions:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}
+          
+      - name: Setup node js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+      
+      - name: Install dependencies
+        run: |
+          npm ci
+
+      - name: Update versioning
+        run: |
+          npx dot-json@1 ./src/manifest.json version "${{ steps.generate_version.outputs.release-version }}"
+          npx dot-json@1 package.json version "${{ steps.generate_version.outputs.release-version }}"
+
+      - name: Commit changes
+        run: |
+          git add .
+          git commit -m "chore(release): Bump up to v$(grep version package.json | awk -F \" '{print $4}')[skip ci]"
+          git push origin HEAD
+  
   bundle-and-release:
+    needs: update-manifest-version
     runs-on: ubuntu-latest
     env:
       GH_TOKEN: ${{ secrets.GH_TOKEN }}
@@ -20,48 +71,11 @@ jobs:
 
       - name: Bundle to zip
         run: |
+          git pull origin main
           zip -r extension.zip src
       
-      - name: Get version number
-        uses: codfish/semantic-release-action@v3
-        id: generate_version
-        with:
-          branches: |
-            [
-              '+([0-9])?(.{+([0-9]),x}).x',
-              'main',
-              'next',
-              'next-major',
-              {
-                name: 'beta',
-                prerelease: true
-              },
-              {
-                name: 'alpha',
-                prerelease: true
-              }
-            ]
-          additional-packages: |
-            ['@semantic-release/git']
-          plugins: |
-            [
-              "@semantic-release/commit-analyzer",
-              "@semantic-release/release-notes-generator",
-              [
-                "@semantic-release/git", {
-                  "assets": ["package.json", "./src/manifest.json"],
-                  "message": "chore(release): ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}"
-                }
-              ],
-              [
-                "@semantic-release/github",{
-                  "assets": [
-                    {  
-                      "path": "./extension.zip",
-                      "label": "Chrome extension" 
-                    }
-                  ]
-                }
-              ]
-            ]
+      - name: Release zip
+        run: |
+          npm ci
+          npm run release
         
