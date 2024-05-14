@@ -44,7 +44,7 @@ jobs:
       
       - name: Show versions
         run: |
-          echo ${{ steps.generate_version.outputs.release-version }}"
+          echo "${{ steps.generate_version.outputs.release-version }}"
 
       - name: Update versioning
         run: |
