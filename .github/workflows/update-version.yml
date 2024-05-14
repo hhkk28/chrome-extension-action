@@ -19,6 +19,7 @@ jobs:
         id: generate_version
         with:
           dry-run: true
+          branches: main
           plugins: |
             [
               '@semantic-release/commit-analyzer',
@@ -40,6 +41,10 @@ jobs:
       - name: Install dependencies
         run: |
           npm ci
+      
+      - name: Show versions
+        run: |
+          echo ${{ steps.generate_version.outputs.release-version }}"
 
       - name: Update versioning
         run: |
