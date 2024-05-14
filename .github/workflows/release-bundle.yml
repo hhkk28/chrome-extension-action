@@ -1,4 +1,4 @@
-name: Update manifest version
+name: Create release
 on:
   push:
     branches:
