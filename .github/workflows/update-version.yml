@@ -50,4 +50,3 @@ jobs:
         run: |
           git add .
           git commit -m "chore(release): Bump up to v$(grep version package.json | awk -F \" '{print $4}')[skip ci]"
-          git push origin HEAD
