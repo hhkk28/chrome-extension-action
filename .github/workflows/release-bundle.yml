@@ -2,7 +2,7 @@ name: Update manifest version
 on:
   push:
     branches:
-      - main
+      - master
 
 jobs:
   update-manifest-version:
@@ -14,6 +14,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          token: GH_TOKEN
       
       - name: Get version number
         uses: codfish/semantic-release-action@v3
@@ -24,14 +26,18 @@ jobs:
             [
               '@semantic-release/commit-analyzer',
              '@semantic-release/release-notes-generator',
-             '@semantic-release/github',
+              [
+                '@semantic-release/github',
+                {
+                  "assets": [
+                    {
+                      "path": "./extension.zip",
+                      "name": "./extension.zip"
+                    }
+                  ]
+                }
+              ]
             ]
-      
-      - name: Configuration GitHub
-        run: |
-          git config --global user.name 'Harish Karthik'
-          git config --global user.email '85559412+hhkk28@users.noreply.github.com'
-          git remote set-url origin https://github-actions:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}
           
       - name: Setup node js
         uses: actions/setup-node@v4
@@ -48,9 +54,10 @@ jobs:
           npx dot-json@1 package.json version "${{ steps.generate_version.outputs.release-version }}"
 
       - name: Commit changes
-        run: |
-          git add .
-          git commit -m "chore(release): Bump up to v$(grep version package.json | awk -F \" '{print $4}')[skip ci]"
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: "chore(release): Bump up manifest version [skip ci]"
+          branch: master
   
   bundle-and-release:
     needs: update-manifest-version
@@ -62,6 +69,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          token: GH_TOKEN
       
       - name: Setup node js
         uses: actions/setup-node@v4
@@ -70,11 +79,28 @@ jobs:
 
       - name: Bundle to zip
         run: |
-          git pull origin main
-          zip -r extension.zip src
+          git pull origin master
+          cd src
+          zip -r ../extension.zip .
       
-      - name: Release zip
-        run: |
-          npm ci
-          npm run release
+      - name: Get version number
+        uses: codfish/semantic-release-action@v3
+        id: generate_version
+        with:
+          plugins: |
+            [
+              '@semantic-release/commit-analyzer',
+              '@semantic-release/release-notes-generator',
+              [
+                '@semantic-release/github',
+                {
+                  "assets": [
+                    {
+                      "path": "./extension.zip",
+                      "name": "./extension.zip"
+                    }
+                  ]
+                }
+              ]
+            ]
         
